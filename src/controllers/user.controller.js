@@ -1,0 +1,138 @@
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { ApiError } from "../utils/apiError.js";
+import { ApiResponse } from "../utils/apiResponse.js";
+import { User } from "../models/user.model.js";
+
+const generateAccessTokenAndRefreshToken = async (userId) => {
+  try {
+    const user = await User.findById(userId);
+    // console.log("User: ", user);
+    const accessToken = user.generateAccessToken();
+    // console.log("AccessToken: ", accessToken);
+    const refreshToken = user.generateRefreshToken();
+    // console.log("RefreshToken: ", refreshToken);
+
+    user.refreshToken = refreshToken;
+    await user.save({ validateBeforeSave: false });
+
+    console.log("Tokens successfuly saved to user document");
+    return { accessToken, refreshToken };
+  } catch (error) {
+    throw new ApiError(500, "Something went wrong while generating the token");
+  }
+};
+
+const registerUser = asyncHandler(async (req, res) => {
+  const { fullName, email, password, location } = req.body;
+
+  if ([fullName, email, password].some((field) => field?.trim() === "")) {
+    throw new ApiError(400, "All fields are required");
+  }
+
+  const existingUser = await User.findOne({ email });
+
+  if (existingUser) {
+    throw new ApiError(409, "User with this email already exists");
+  }
+
+  const user = await User.create({
+    fullName,
+    email,
+    password,
+    location,
+  });
+
+  const createdUser = await User.findById(user._id).select(
+    "-password -refreshToken"
+  );
+
+  if (!createdUser) {
+    throw new ApiError(500, "Something went wrong while creating the user");
+  }
+
+  return res
+    .status(201)
+    .json(new ApiResponse(201, createdUser, "User created successfully"));
+});
+
+const userLogin = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email) {
+    throw new ApiError(400, "Email address not provided");
+  }
+
+  if (!password) {
+    throw new ApiError(400, "Password not provided");
+  }
+
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    throw new ApiError(404, "User not found with this email address");
+  }
+
+  const checkPassword = await user.isPasswordCorrect(password);
+
+  if (!checkPassword) {
+    throw new ApiError(403, "Invalid password provided");
+  }
+
+  const { accessToken, refreshToken } =
+    await generateAccessTokenAndRefreshToken(user._id);
+
+  /*
+  user.refreshToken = refreshToken;
+  user.save();
+
+  user.password = undefined;
+  user.refreshToken = undefined;
+  */
+  const loggedInUser = await User.findById(user._id).select(
+    "-password -refreshToken"
+  );
+
+  const options = {
+    httpOnly: true,
+    secure: true,
+  };
+
+  return res
+    .status(200)
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
+    .json(
+      new ApiResponse(
+        200,
+        { user: loggedInUser, accessToken, refreshToken },
+        "User logged In successfully"
+      )
+    );
+});
+
+const userLogout = asyncHandler(async (req, res) => {
+  await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $unset: {
+        refreshToken: 1,
+      },
+    },
+    {
+      new: true,
+    }
+  );
+
+  const options = {
+    httpOnly: true,
+    secure: true,
+  };
+
+  return res
+    .status(200)
+    .clearCookie("accessToken", options)
+    .clearCookie("refreshToken", options)
+    .json(new ApiResponse(200, {}, "User logged out successfully"));
+});
+
+export { registerUser, userLogin, userLogout };
