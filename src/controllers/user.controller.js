@@ -135,4 +135,34 @@ const userLogout = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "User logged out successfully"));
 });
 
-export { registerUser, userLogin, userLogout };
+const changePassword = asyncHandler(async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+
+  if (!oldPassword) {
+    throw new ApiError(400, "Old password not provided");
+  }
+
+  if (!newPassword) {
+    throw new ApiError(400, "New password not provided");
+  }
+
+  const user = await User.findById(req.user?._id);
+  if (!user) {
+    throw new ApiError();
+  }
+
+  const checkOldPassword = await user.isPasswordCorrect(oldPassword);
+
+  if (!checkOldPassword) {
+    throw new ApiError(401, "Invalid Password");
+  }
+
+  user.password = newPassword;
+  user.save();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Password changed successfully"));
+});
+
+export { registerUser, userLogin, userLogout, changePassword };
