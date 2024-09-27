@@ -3,9 +3,17 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import morgan from "morgan";
 
+//security packages
+import helmet from "helmet";
+import ExpressMongoSanitize from "express-mongo-sanitize";
+
 const app = express();
 
 // "MIDDLEWARES"
+
+app.use(helmet());
+app.use(ExpressMongoSanitize());
+
 app.use(
   cors({
     origin: process.env.CORS_ORIGIN,
