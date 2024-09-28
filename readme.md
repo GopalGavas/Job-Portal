@@ -61,7 +61,7 @@ This API allows you to manage job postings, including creating, retrieving, upda
 
 API documentation is available at: [API Documentation Link](http://localhost:8000/api/v1/doc/#/)
 
-## API Endpoints
+## Endpoints
 
 ### User API
 
