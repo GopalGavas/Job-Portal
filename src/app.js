@@ -3,9 +3,33 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import morgan from "morgan";
 
+//  API documentation
+import swaggerUi from "swagger-ui-express";
+import swaggerJSDoc from "swagger-jsdoc";
+
 //security packages
 import helmet from "helmet";
 import ExpressMongoSanitize from "express-mongo-sanitize";
+
+// "swagger api config"
+const options = {
+  definition: {
+    openapi: "3.0.0",
+    info: {
+      title: "Job Portal description",
+      version: "1.0.0",
+      description: "Node Expressjs Job Portal Application",
+    },
+    servers: [
+      {
+        url: "http://localhost:8000",
+      },
+    ],
+  },
+  apis: ["./src/routes/*.js"],
+};
+
+const spec = swaggerJSDoc(options);
 
 const app = express();
 
@@ -37,5 +61,8 @@ import jobRouter from "./routes/job.routes.js";
 
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/job", jobRouter);
+
+// doc route
+app.use("/api/v1/doc", swaggerUi.serve, swaggerUi.setup(spec));
 
 export { app };
