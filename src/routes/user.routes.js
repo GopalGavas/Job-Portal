@@ -125,21 +125,61 @@ const router = Router();
 
 /**
  * @swagger
- * /api/v1/user/profile:
- *   get:
- *     summary: Get user profile
+ * /api/v1/user/change-password:
+ *   post:
+ *     summary: Change the user's password
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               oldPassword:
+ *                 type: string
+ *                 description: Current password of the user
+ *               newPassword:
+ *                 type: string
+ *                 description: New password for the user
  *     responses:
  *       200:
- *         description: Successfully fetched user profile
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/User'
+ *         description: Password changed successfully
+ *       400:
+ *         description: Bad request
  *       401:
  *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * /api/v1/user/refresh-token:
+ *   post:
+ *     summary: Refresh the user's access token
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *                 description: The refresh token
+ *     responses:
+ *       200:
+ *         description: Access token refreshed successfully
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Invalid refresh token
  *       500:
  *         description: Internal server error
  */
@@ -175,15 +215,15 @@ const router = Router();
 
 /**
  * @swagger
- * /api/v1/user/delete-account:
- *   delete:
- *     summary: Delete user account
+ * /api/v1/user/logout:
+ *   post:
+ *     summary: Logout the user
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: User account deleted successfully
+ *         description: User logged out successfully
  *       401:
  *         description: Unauthorized
  *       500:

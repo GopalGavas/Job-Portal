@@ -63,6 +63,6 @@ app.use("/api/v1/user", userRouter);
 app.use("/api/v1/job", jobRouter);
 
 // doc route
-app.use("/api/v1/doc", swaggerUi.serve, swaggerUi.setup(spec));
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(spec));
 
 export { app };
