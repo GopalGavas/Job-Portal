@@ -59,7 +59,7 @@ This API allows you to manage job postings, including creating, retrieving, upda
 
 ## API Documentation
 
-API documentation is available at: [API Documentation Link](https://job-portal-a4px.onrender.com/api/v1/doc/)
+API documentation is available at: [API Documentation Link](https://job-portal-a4px.onrender.com/docs)
 
 ## Endpoints
 
