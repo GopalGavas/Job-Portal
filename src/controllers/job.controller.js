@@ -4,7 +4,6 @@ import { ApiResponse } from "../utils/apiResponse.js";
 import { Job } from "../models/jobs.model.js";
 import mongoose, { isValidObjectId } from "mongoose";
 import moment from "moment";
-import { application, query } from "express";
 
 const createJob = asyncHandler(async (req, res) => {
   const { company, position, workLocation } = req.body;
